@@ -4,11 +4,10 @@
 class Order {
     public $id;
     public $customerName;
-    public $status = "cart";
+    public $status;
     public $totalPrice;
     public $products = [];
-    public $deliveryAdress;
-
+    public $shippingAddress;
 
 
     // le constructeur est une méthode "magique"
@@ -17,41 +16,55 @@ class Order {
     // pour cette classe
     // un objet créé pour une classe est appelée "instance de class"
     public function __construct($customerName) {
+        $this->status === 'cart';
+        $this->totalPrice = 0;
         $this->customerName = $customerName;
         $this->id = uniqid();
     }
 
-    //Methode pour envoyer la commande
-    public function submitOrder() {
-        $this->status = "submitted";
-        return "Commande validée";
-        }
-
-        //Ajout de l'adresse
-    public function addDeliveryAdress($adress) {
-        $this->deliveryAdress = $adress;
-    }
-
-    public function addProduct() {
+    public function addProduct($productName,$price) {
         // le $this fait référence à l'objet actuel
         // c'est à dire à $order1, ou $order2 etc
         // donc à l'objet actuel issu de la classe
         if ($this->status === "cart") {
-            $this->products[] = "Pringles";
-            $this->totalPrice += 3;
+            $this->products[] = $productName;
+            $this->totalPrice += $price;
         }
     }
 
     public function removeProduct() {
+
         if ($this->status === "cart" && !empty($this->products)) {
-    array_pop($this->products);
+            array_pop($this->products);
+            $this->totalPrice -= 3;
+        }
+    }
+
+    public function setShippingAddress($shippingAddress) {
+        if ($this->status === "cart") {
+            $this->shippingAddress = $shippingAddress;
+            $this->status === "shippingAddressSet";
+        }
+    }
+
+    public function pay() {
+        if($this->status === "shippingAddressSet" && !empty($this->products)) {
+            $this->status = "paid";
+        } else {
+            // si le paiement ne peux pas être fait
+            // on lève une exception, c'est à dire on déclenche une erreur
+            // que l'on peut récupérer ensuite pour l'afficher dans le HTML
+            throw new Exception('Vous ne pouvez pas payer, merci de remplir votre adresse d\'abord');
         }
 
     }
 
-    public function pay() {
-        if($this->status === "cart") {
-            $this->status = "paid";
+
+    public function ship() {
+        if ($this->status === 'paid') {
+            $this->status = "shipped";
+        } else {
+            throw new Exception("La commande ne peux pas être expédiée. elle n'est pas encore payée");
         }
     }
 }
@@ -61,15 +74,10 @@ class Order {
 
 // je créé une instance de la classe Order
 // c'est à dire un objet issu du plan de construction de la classe Order
-$order1 = new Order("Anthony Gevers"); //On créé un nouvel objet Order avec le nom du client et un identifiant unique (uniqid)
-echo $order1->addDeliveryAdress("111 rue de Jojo,33000 Bordeaux");
-echo $order1->submitOrder();
-$order1->addProduct();
-$order1->addProduct();
-$order1->addProduct();
+$order1 = new Order("Anthony Gevers");
+$order1->addProduct("Tomate",1);
+$order1->addProduct("Brocolis",3);
+$order1->addProduct("Poulet",6);
+$order1->addProduct("Pizza",10);
 
-$order2 = new Order();
-$order2->addProduct();
-
-
-$order1->pay();;
+$order1->ship();
