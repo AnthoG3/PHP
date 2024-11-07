@@ -26,6 +26,8 @@ class Order {
         $this->status = "submitted";
         return "Commande validée";
         }
+
+        //Ajout de l'adresse
     public function addDeliveryAdress($adress) {
         $this->deliveryAdress = $adress;
     }
